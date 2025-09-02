@@ -7,11 +7,8 @@ import {
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react"
-
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
+  Avatar, AvatarFallback, AvatarImage,
 } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -29,16 +26,44 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    name: string
-    email: string
-    avatar: string
-  }
-}) {
+import { Skeleton } from "@/components/ui/skeleton"   // ✅ ShadCN Skeleton
+import { useSession, signOut } from "@/lib/auth-client"
+
+export function NavUser() {
   const { isMobile } = useSidebar()
+  const { data: session, isPending } = useSession()
+
+  if (isPending) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg" className="flex items-center gap-2">
+            <Skeleton className="h-8 w-8 rounded-lg" />   {/* Avatar skeleton */}
+            <div className="flex flex-col flex-1 gap-1">
+              <Skeleton className="h-4 w-[100px]" />     {/* Name skeleton */}
+              <Skeleton className="h-3 w-[150px]" />     {/* Email skeleton */}
+            </div>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
+
+  if (!session?.user) {
+    return (
+      <SidebarMenu>
+        <SidebarMenuItem>
+          <SidebarMenuButton size="lg">Not signed in</SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
+    )
+  }
+
+  const user = {
+    name: session.user.name || "Anonymous",
+    email: session.user.email || "",
+    avatar: session.user.image || "/default-avatar.png",
+  }
 
   return (
     <SidebarMenu>
@@ -51,7 +76,9 @@ export function NavUser({
             >
               <Avatar className="h-8 w-8 rounded-lg grayscale">
                 <AvatarImage src={user.avatar} alt={user.name} />
-                <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                <AvatarFallback className="rounded-lg">
+                  {user.name?.[0] || "U"}
+                </AvatarFallback>
               </Avatar>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{user.name}</span>
@@ -72,7 +99,9 @@ export function NavUser({
               <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                 <Avatar className="h-8 w-8 rounded-lg">
                   <AvatarImage src={user.avatar} alt={user.name} />
-                  <AvatarFallback className="rounded-lg">CN</AvatarFallback>
+                  <AvatarFallback className="rounded-lg">
+                    {user.name?.[0] || "U"}
+                  </AvatarFallback>
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
                   <span className="truncate font-medium">{user.name}</span>
@@ -84,21 +113,12 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <IconUserCircle />
-                Account
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconCreditCard />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <IconNotification />
-                Notifications
-              </DropdownMenuItem>
+              <DropdownMenuItem><IconUserCircle />Account</DropdownMenuItem>
+              <DropdownMenuItem><IconCreditCard />Billing</DropdownMenuItem>
+              <DropdownMenuItem><IconNotification />Notifications</DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => signOut()}>
               <IconLogout />
               Log out
             </DropdownMenuItem>
