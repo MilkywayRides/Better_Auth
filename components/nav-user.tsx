@@ -26,7 +26,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar"
 
-import { Skeleton } from "@/components/ui/skeleton"   // ✅ ShadCN Skeleton
+import { Skeleton } from "@/components/ui/skeleton"
 import { useSession, signOut } from "@/lib/auth-client"
 
 export function NavUser() {
@@ -38,10 +38,10 @@ export function NavUser() {
       <SidebarMenu>
         <SidebarMenuItem>
           <SidebarMenuButton size="lg" className="flex items-center gap-2">
-            <Skeleton className="h-8 w-8 rounded-lg" />   {/* Avatar skeleton */}
+            <Skeleton className="h-8 w-8 rounded-lg" />
             <div className="flex flex-col flex-1 gap-1">
-              <Skeleton className="h-4 w-[100px]" />     {/* Name skeleton */}
-              <Skeleton className="h-3 w-[150px]" />     {/* Email skeleton */}
+              <Skeleton className="h-4 w-[100px]" />
+              <Skeleton className="h-3 w-[150px]" />
             </div>
           </SidebarMenuButton>
         </SidebarMenuItem>
@@ -118,10 +118,20 @@ export function NavUser() {
               <DropdownMenuItem><IconNotification />Notifications</DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => signOut()}>
+            <DropdownMenuItem
+              onClick={async () => {
+                try {
+                  await signOut()
+                  window.location.href = "/login"
+                } catch (err) {
+                  console.error("Logout failed:", err)
+                }
+              }}
+            >
               <IconLogout />
               Log out
             </DropdownMenuItem>
+
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>
